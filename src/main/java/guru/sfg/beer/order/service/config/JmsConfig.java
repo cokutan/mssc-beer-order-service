@@ -2,6 +2,8 @@ package guru.sfg.beer.order.service.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.ConnectionFactory;
+import jakarta.jms.JMSException;
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.connection.SingleConnectionFactory;
@@ -32,11 +34,14 @@ public class JmsConfig {
     }
 
     @Bean
-    public ConnectionFactory connectionFactory() {
-        // Create and configure the ActiveMQConnectionFactory (you can change this to match your JMS provider)
-        SingleConnectionFactory connectionFactory = new SingleConnectionFactory();
-        return new SingleConnectionFactory(connectionFactory);  // Ensures a single connection is used
+    public ConnectionFactory connectionFactory(ArtemisProperties artemisProperties) throws JMSException {
+        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory();
+        activeMQConnectionFactory.setBrokerURL(artemisProperties.getBrokerUrl());
+        activeMQConnectionFactory.setUser(artemisProperties.getUser());
+        activeMQConnectionFactory.setPassword(artemisProperties.getPassword());
+        return new SingleConnectionFactory(activeMQConnectionFactory); // Ensures a single connection is used
     }
+
 
     // JmsTemplate Bean
     @Bean
